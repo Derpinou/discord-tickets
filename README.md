@@ -1,7 +1,7 @@
 <div align="center">
   <br />
   <p>
-    <a href="https://discord.js.org"><img src="https://cdn.sayrix.fr/1u3/logo.svg" width="546" alt="discord.js" /></a>
+    <a href="https://discord-tickets.js.org"><img src="https://cdn.sayrix.fr/1u3/logo.svg" width="546" alt="discord-tickets" /></a>
   </p>
   <br />
   <p>

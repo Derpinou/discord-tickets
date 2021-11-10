@@ -39,7 +39,11 @@
     "url": "https://github.com/Derpinou/discord-tickets/issues"
   },
   "homepage": "https://discord-tickets.js.org",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^14.0.5",
+    "discord.js": "^13.1.0",
+    "typescript": "^4.0.2",
     "@babel/cli": "^7.14.8",
     "@babel/core": "^7.15.0",
     "@babel/preset-env": "^7.15.0",
@@ -48,10 +52,5 @@
     "gen-esm-wrapper": "^1.1.2",
     "jsdoc-babel": "^0.5.0",
     "jsdoc-strip-async-await": "^0.1.0"
-  },
-  "devDependencies": {
-    "@types/node": "^14.0.5",
-    "discord.js": "^13.1.0",
-    "typescript": "^4.0.2"
   }
 }

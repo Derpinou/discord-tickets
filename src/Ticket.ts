@@ -40,6 +40,7 @@ export class Ticket {
         /**
          * The discord guild id
          * @readonly
+         * @private
          * @type {string}
          */
         this.guildId = data.guild;
@@ -60,14 +61,13 @@ export class Ticket {
         /**
          * The ticket number
          * @readonly
-         * @private
          * @type {string}
          */
         this.number = data.number;
         /**
          * The ticket status
          * @readonly
-         * @type {TicketStatus}
+         * @type {string}
          */
         this.status = data.status;
         /**
@@ -88,16 +88,16 @@ export class Ticket {
 
     /**
      * Ticket's Channel
-     * @type {Guild}
+     * @type {TextChannel}
      * @readonly
      */
     get channel(): TextChannel {
-        return this.guild?.channels.cache.get(this.channelId) as TextChannel
+        return this.guild.channels.cache.get(this.channelId) as TextChannel
     }
 
     /**
      * Ticket's Member
-     * @type {Guild}
+     * @type {GuildMember}
      * @readonly
      */
     get member(): GuildMember {

@@ -107,7 +107,7 @@ client.ticketManager = new TicketManagerWithDB(client);
 ## Links
 
 - [Website](https://discord-tickets.js.org/) ([source](https://github.com/Derpinou/discord-tickets-docs))
-- [Documentation](https://discord.js.org/#/docs)
+- [Documentation](https://discord-tickets.js.org/#/docs)
 - [Support & Help Discord server](https://discord.gg/ncheNRHFR7)
 - [discord.js Discord server](https://discord.gg/djs)
 - [Discord API Discord server](https://discord.gg/discord-api)

@@ -111,6 +111,14 @@ export class Ticket {
     async close(): Promise<void> {
         await this.manager.closeTicket(this)
     }
+    
+        /**
+     * Rename Ticket
+     * @return {Promise<void>}
+     */
+    async rename(): Promise<void> {
+        await this.manager.renameTicket(this)
+    }
 
     /**
      * Delete Ticket

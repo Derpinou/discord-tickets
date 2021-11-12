@@ -116,8 +116,8 @@ export class Ticket {
      * Rename Ticket
      * @return {Promise<void>}
      */
-    async rename(): Promise<void> {
-        await this.manager.renameTicket(this)
+    async rename(name): Promise<void> {
+        await this.manager.renameTicket(this, name)
     }
 
     /**

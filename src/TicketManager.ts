@@ -237,6 +237,22 @@ export class TicketManager extends EventEmitter {
          */
         return this.emit("ticketDeleted", ticket);
     }
+    
+    
+    /**
+     * Rename Ticket
+     * @param {Ticket} ticket Ticket class
+     * @return {Promise<any>}
+     */
+    async renameTicket (ticket: Ticket, name: string): Promise<any> {
+        await ticket.guild.channels.cache.get(ticket.channelId)?.setName(name);
+        /**
+         * Emitted when ticket be renamed
+         * @event TicketManager#ticketDeleted
+         * @param {Ticket} ticket Ticket resolvable
+         */
+        return this.emit("ticketRenamed", ticket);
+    }
 
     /**
      * Close Ticket

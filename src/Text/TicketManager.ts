@@ -1,9 +1,35 @@
-import {EventEmitter} from 'events';
-import {exists, readFile, writeFile} from 'fs';
-import {promisify} from 'util';
-const writeFileAsync = promisify(writeFile);
-const existsAsync = promisify(exists);
-const readFileAsync = promisify(readFile);
+import { TextTicket } from "./TextTicket";
+import { BaseManager } from "../Base/BaseManager";
+
+/**
+ * @external CategoryChannel
+ * @see {@link https://discord.js.org/#/docs/main/stable/class/CategoryChannel}
+ */
+
+/**
+ * @external Client
+ * @see {@link https://discord.js.org/#/docs/main/stable/class/Client}
+ */
+
+/**
+ * @external Collection
+ * @see {@link https://discord.js.org/#/docs/collection/stable/class/Collection}
+ */
+
+/**
+ * @external Guild
+ * @see {@link https://discord.js.org/#/docs/main/stable/class/Guild}
+ */
+
+/**
+ * @external GuildMember
+ * @see {@link https://discord.js.org/#/docs/main/stable/class/GuildMember}
+ */
+
+/**
+ * @external Permissions
+ * @see {@link https://discord.js.org/#/docs/main/stable/class/Permissions}
+ */
 
 import {
     CategoryChannel,
@@ -13,29 +39,25 @@ import {
     GuildMember,
     Permissions
 } from "discord.js";
-
 import {
     TicketManagerOptions,
     TicketData,
     TicketManagerEvents,
-} from "./interfaces";
-
-import {Ticket} from "./Ticket";
-
+} from "../types/types";
 /**
- * Ticket Manager
+ * Text Ticket Manager
+ * @extends {BaseManager}
  */
-export class TicketManager extends EventEmitter {
+export class TicketManager extends BaseManager {
     readonly client: Client;
     options: TicketManagerOptions;
-    ticketRaws: Array<TicketData>;
-    tickets: Collection<string, Ticket>
+    tickets: Collection<string, TextTicket>;
     /**
      * @param {Client} client Discord Client
      * @param {TicketManagerOptions} [options] TicketManager options
      */
     constructor(client: Client, options?: TicketManagerOptions) {
-        super();
+        super(client, options);
         /**
          * The Discord Client
          * @readonly
@@ -48,19 +70,13 @@ export class TicketManager extends EventEmitter {
          * @type {TicketManagerOptions}
          */
         this.options = options as TicketManagerOptions;
-        /**
-         * Array with all tickets
-         * @type {Array<TicketData>}
-         */
-        this.ticketRaws = [];
+
         /**
          * Collection with all tickets (tickets's cache)
          * @type {Collection<string, TicketData>}
          */
-        this.tickets = new Collection();
-
+        this.tickets = new Collection<string, TextTicket>();
         this.cachingTickets().then(r => null);
-
     }
     /**
      * Caching raws tickets into Array
@@ -71,7 +87,7 @@ export class TicketManager extends EventEmitter {
         this.ticketRaws = await this.getAllTickets();
         if (this.options.ticketCache) {
             this.ticketRaws.forEach(ticket => {
-                this.tickets.set(ticket.channel, new Ticket(this, ticket));
+                this.tickets.set(ticket.channel, new TextTicket(this, ticket));
             })
         }
     }
@@ -85,83 +101,27 @@ export class TicketManager extends EventEmitter {
         event: U, ...args: Parameters<TicketManagerEvents[U]>
     ): boolean;
 
+    /**
+     * Get options
+     * @private
+     * @param {string} id
+     * @return {TicketManagerOptions}
+     */
     // @ts-ignore
     async getOptions(id: string): Promise<TicketManagerOptions> {
-        return this.options
-    }
-
-    /**
-     * Get All ticket raw from Database/JSON storage
-     * @return {Promise<Array<TicketData>>}
-     */
-    async getAllTickets(): Promise<Array<TicketData>> {
-        // Whether the storage file exists, or not
-        const storageExists = await existsAsync(this.options.storage);
-        // If it doesn't exists
-        if (!storageExists) {
-            // Create the file with an empty array
-            await writeFileAsync(this.options.storage, '[]', 'utf-8');
-            return [];
-        } else {
-            // If the file exists, read it
-            const storageContent = await readFileAsync(this.options.storage);
-            try {
-                const tickets = await JSON.parse(storageContent.toString());
-                if (Array.isArray(tickets)) {
-                    return tickets;
-                } else {
-                    console.log(storageContent, tickets);
-                    throw new SyntaxError('The storage file is not properly formatted (tickets is not an array).');
-                }
-            } catch (e) {
-                // @ts-ignore
-                if (e.message === 'Unexpected end of JSON input') {
-                    throw new SyntaxError('The storage file is not properly formatted (Unexpected end of JSON input).');
-                } else {
-                    throw e;
-                }
-            }
-        }
-    }
-
-    /**
-     * Save all tickets on Database/JSON storage
-     * @return {Promise<boolean>}
-     */
-    async saveTicketRaws(): Promise<boolean> {
-        await writeFileAsync(
-            this.options.storage,
-            JSON.stringify(this.ticketRaws),
-            'utf-8'
-        );
-        return true;
-    }
-
-    /**
-     * Check if member already has ticket
-     * @param {string} guildID Discord Guild Id
-     * @param {string} memberID Discord Guild Member Id
-     */
-    checkDoubleTickets (guildID: string, memberID: string): boolean {
-        return !!this.ticketRaws.find(x => x.guild === guildID && x.member === memberID);
-    }
-
-    /**
-     * Get Guild Class from client cache (is you're using shards)
-     * @param {string} id Discord Guild Id
-     * @return {Promise<Guild>}
-     */
-    getGuild(id: string): Guild | undefined {
-        return this.client.guilds.cache.get(id);
+        return this.options;
     }
 
     /**
      * Create Ticket
      * @param {Guild} guild Discord Guild
      * @param {GuildMember} member Discord Guild Member
-     * @return {Promise<Ticket>}
+     * @return {Promise<TextTicket>}
+     * @example
+     * //Create Thread Ticket
+     * await ticketText.createTicket(message.guild, message.member)
      */
-    async createTicket(guild: Guild, member: GuildMember): Promise<Ticket | undefined> {
+    async createTicket(guild: Guild, member: GuildMember): Promise<TextTicket | undefined> {
         const options = await this.getOptions(guild.id);
         if (!options) throw new Error("Cannot find options");
         const category: CategoryChannel = guild.channels.cache.get(options.parentId) as CategoryChannel;
@@ -198,13 +158,14 @@ export class TicketManager extends EventEmitter {
             // @ts-ignore
             number: number,
             status: "open",
-            participants: [member.id]
+            participants: [member.id],
+            type: "channel"
         };
         this.ticketRaws.push(data);
         await this.saveTicketRaws();
-        const ticket = new Ticket(this, data);
+        const ticket = new TextTicket(this, data);
         if (this.options.ticketCache) {
-            this.tickets.set(data.channel, new Ticket(this, data));
+            this.tickets.set(data.channel, new TextTicket(this, data));
         }
         if (this.options.channelTopic) {
             await channel.setTopic("ticket#" + newNumber, "Set ticket topic");
@@ -212,7 +173,7 @@ export class TicketManager extends EventEmitter {
         /**
          * Emitted when user create ticket
          * @event TicketManager#ticketCreate
-         * @param {Ticket} ticket Ticket resolvable
+         * @param {TextTicket} ticket Ticket resolvable
          */
         this.emit("ticketCreate", ticket);
         return ticket;
@@ -220,12 +181,12 @@ export class TicketManager extends EventEmitter {
 
     /**
      * Delete Ticket
-     * @param {Ticket} ticket Ticket class
+     * @param {TextTicket} ticket Ticket class
      * @return {Promise<any>}
      */
-    async deleteTicket (ticket: Ticket): Promise<any> {
-        await ticket.guild.channels.cache.get(ticket.channelId)?.delete();
-        this.ticketRaws = this.ticketRaws.filter(y => y.channel !== ticket.data.channel);
+    async deleteTicket (ticket: TextTicket): Promise<any> {
+        await ticket.channel.delete();
+        this.ticketRaws = this.ticketRaws.filter(y => y.channel !== ticket.channelId);
         await this.saveTicketRaws();
         if (this.options.ticketCache) {
             this.tickets.delete(ticket.channelId);
@@ -233,34 +194,17 @@ export class TicketManager extends EventEmitter {
         /**
          * Emitted when ticket be delete
          * @event TicketManager#ticketDeleted
-         * @param {Ticket} ticket Ticket resolvable
+         * @param {TextTicket} ticket Ticket resolvable
          */
         return this.emit("ticketDeleted", ticket);
-    }
-    
-    
-    /**
-     * Rename Ticket
-     * @param {Ticket} ticket Ticket class
-     * @param {Name} name Name string
-     * @return {Promise<any>}
-     */
-    async renameTicket (ticket: Ticket, name: string): Promise<any> {
-        await ticket.guild.channels.cache.get(ticket.channelId)?.setName(name);
-        /**
-         * Emitted when ticket be renamed
-         * @event TicketManager#ticketRenamed
-         * @param {Ticket} ticket Ticket resolvable
-         */
-        return this.emit("ticketRenamed", ticket);
     }
 
     /**
      * Close Ticket
-     * @param {Ticket} ticket Ticket class
+     * @param {TextTicket} ticket Ticket class
      * @return {Promise<any>}
      */
-    async closeTicket(ticket: Ticket): Promise<any> {
+    async closeTicket(ticket: TextTicket): Promise<any> {
         const options = await this.getOptions(ticket.guild.id);
         if (!options) throw new Error("Cannot find options");
         const category: CategoryChannel = ticket.guild.channels.cache.get(options.closeParentId) as CategoryChannel;
@@ -285,25 +229,31 @@ export class TicketManager extends EventEmitter {
                     allow: [Permissions.FLAGS.VIEW_CHANNEL, Permissions.FLAGS.SEND_MESSAGES]
                 }
             ]
-        })
+        });
+        let data = ticket.data;
+        data.status = "closed";
+        ticket = new TextTicket(this, data);
+        this.tickets.set(ticket.channelId, ticket);
+        let index = this.ticketRaws.indexOf(data);
+        this.ticketRaws[index] = data;
+        await this.saveTicketRaws();
         /**
          * Emitted when ticket be closed
          * @event TicketManager#ticketClosed
-         * @param {Ticket} ticket Ticket resolvable
-         * @param {string} moderator Discord User ID
+         * @param {TextTicket} ticket Ticket resolvable
          */
         return this.emit("ticketClosed", ticket);
     }
 
     /**
      * ReOpen ticket
-     * @param {Ticket} ticket Ticket Resolvable
+     * @param {TextTicket} ticket Ticket Resolvable
      * @return {Promise<any>}
      */
-    async reOpenTicket(ticket: Ticket): Promise<any> {
+    async reOpenTicket(ticket: TextTicket): Promise<any> {
         const options = await this.getOptions(ticket.guild.id);
         if (!options) throw new Error("Cannot find options");
-        const category: CategoryChannel = ticket.guild.channels.cache.get(options.parentId) as CategoryChannel
+        const category: CategoryChannel = ticket.guild.channels.cache.get(options.parentId) as CategoryChannel;
         if (!category || category.type !== "GUILD_CATEGORY") throw new Error("Cannot find tickets category, please check id/if channel type is GUILD_CATEGORY");
         const ticketChannel = ticket.guild.channels.cache.get(ticket.channelId);
         if (!ticketChannel) return;
@@ -324,36 +274,48 @@ export class TicketManager extends EventEmitter {
                 }
             ]
         });
+        let data = ticket.data;
+        data.status = "open";
+        ticket = new TextTicket(this, data);
+        this.tickets.set(ticket.channelId, ticket);
+        let index = this.ticketRaws.indexOf(data);
+        this.ticketRaws[index] = data;
+        await this.saveTicketRaws();
         /**
          * Emitted when ticket be reopen
          * @event TicketManager#ticketReOpen
-         * @param {Ticket} ticket Ticket resolvable
+         * @param {TextTicket} ticket Ticket resolvable
          */
         return this.emit("ticketReOpen", ticket);
+    }
+
+    /**
+     * Rename Ticket
+     * @param {ThreadTicket} ticket ThreadTicket
+     * @param {string} name new Name
+     * @return {Promise<any>}
+     */
+    async renameTicket (ticket: TextTicket, name: string): Promise<any> {
+        let newNumber = "0000"+ticket.number;
+        newNumber = newNumber.slice(newNumber.length-4, newNumber.length+2);
+        await ticket.channel.setName(`${name}-${newNumber}`);
+        /**
+         * Emitted when ticket be renamed
+         * @event TicketManager#ticketRename
+         * @param {TextTicket} ticket Ticket resolvable
+         */
+        return this.emit("ticketRename", ticket);
     }
 }
 
 /**
- * Ticket Manager Config Types
+ * Text Ticket Manager Config Types
  * @typedef {object} TicketManagerOptions
- * @property {boolean} enabled Library status
+ * @property {boolean} enabled Manager status
  * @property {string} parentID Category Id where are created tickets
- * @property {string} staffRole Staff Role ID
- * @property {boolean} [pingStaff] Bot ping staff role when ticket created
+ * @property {string} staffRole Discord Role id who can access to tickets
  * @property {string} closedParentID Category Id where are closed tickets
  * @property {string} [channelTopic] Ticket's channel topic
  * @property {boolean} ticketCache Storing tickets in the cache
- * @property {string} storage Storage File path
- */
-
-
-/**
- * Ticket Data
- * @typedef {object} TicketData
- * @property {string} guild Discord Guild ID
- * @property {string} member Discord Guild Member ID
- * @property {string} channel Discord Channel ID
- * @property {string} number Ticket's number
- * @property {string} status Ticket's status
- * @property {Array<string>} participants Ticket's Participants list
+ * @property {StorageType} storage Storage File path
  */

@@ -5,9 +5,9 @@
   </p>
   <br />
   <p>
-    <a href="https://discord.gg/djs"><img src="https://img.shields.io/discord/848500695506223104?color=5865F2&logo=discord&logoColor=white" alt="Discord server" /></a>
-    <a href="https://www.npmjs.com/package/discord.js"><img src="https://img.shields.io/npm/v/discord-tickets.svg?maxAge=3600" alt="npm version" /></a>
-    <a href="https://www.npmjs.com/package/discord.js"><img src="https://img.shields.io/npm/dt/discord-tickets.svg?maxAge=3600" alt="npm downloads" /></a>
+    <a href="https://discord.gg/ncheNRHFR7"><img src="https://img.shields.io/discord/848500695506223104?color=5865F2&logo=discord&logoColor=white" alt="Discord server" /></a>
+    <a href="https://www.npmjs.com/package/discord-tickets"><img src="https://img.shields.io/npm/v/discord-tickets.svg?maxAge=3600" alt="npm version" /></a>
+    <a href="https://www.npmjs.com/package/discord-tickets"><img src="https://img.shields.io/npm/dt/discord-tickets.svg?maxAge=3600" alt="npm downloads" /></a>
   </p>
 </div>
 
@@ -31,7 +31,7 @@ npm install discord-tickets
 
 ## Example usage
 
-Init library:
+Init Text Ticket Manager:
 
 ```js
 const {TicketManager} = require('discord-tickets');
@@ -41,11 +41,25 @@ client.ticketManager = new TicketManager(client, {
      enabled: true,//If Module is enabled
      parentId: '696891020146638868',//Ticket's category
      staffRole: '613426529623605268',//Role who have access to tickets
-     pingStaff: true,//@Staff when ticket created
      closeParentId: '613425648685547544',//Closed's tickets category
      channelTopic: true,
-     storage: './tickets.json',//Storage ("custom" if you're using database)
+     storage: './tickets.json',//Storage
      ticketCache: true//Save tickets on cache (TicketManager#tickets.get("channelId"))
+});
+```
+
+Init Threads Ticket Manager:
+
+```js
+const {ThreadManager} = require('discord-tickets');
+
+
+client.ticketManager = new ThreadManager(client, {
+    enabled: true,
+    channelId: "697138785317814292",
+    staffRole: "613426529623605268",
+    storage: `./tickets.json`,
+    ticketCache: true
 });
 ```
 

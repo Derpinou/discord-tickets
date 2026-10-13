@@ -1,0 +1,44 @@
+name: Documentation
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write  # Required to push to the docs branch
+
+concurrency:
+  group: docs  # One build at a time, so two pushes never race on the docs branch
+  cancel-in-progress: false
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm run docs
+
+      - name: Push stable.json to the docs branch
+        run: |
+          git fetch --depth=1 origin docs
+          git worktree add docs-branch FETCH_HEAD
+          # meta.date changes on every build: only publish when the documentation itself changed
+          if node -e 'const read = f => { const d = require(f); delete d.meta.date; return JSON.stringify(d); }; process.exit(read(process.argv[1]) === read(process.argv[2]) ? 0 : 1);' "$PWD/stable.json" "$PWD/docs-branch/stable.json"; then
+            echo 'Documentation unchanged, nothing to publish.'
+            exit 0
+          fi
+          cp stable.json docs-branch/stable.json
+          cd docs-branch
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add stable.json
+          git commit -m "Docs build for ${GITHUB_SHA}"
+          git push origin HEAD:docs

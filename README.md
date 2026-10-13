@@ -22,8 +22,6 @@ discord-tickets is a powerful [Node.js](https://nodejs.org) module that allows y
 
 ## Installation
 
-**Node.js 16.6.0 or newer is required.**  
-
 ```sh-session
 npm install discord-tickets
 ```

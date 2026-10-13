@@ -1,6 +1,6 @@
-/.idea
-/node_modules
-/example
-/package-lock.json
-/lib
-/stable.json
+.idea
+node_modules
+tests
+lib
+stable.json
+*.env

@@ -1,6 +1,6 @@
 {
   "name": "discord-tickets",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Discord.js extention library for manage easily tickets",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -8,8 +8,9 @@
     "lib/"
   ],
   "scripts": {
-    "test": "tsc && node example/test.js",
     "build": "tsc",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "docs": "docgen --jsdoc jsdoc.json --source src/**/*.ts --custom docs/index.yml --output stable.json"
   },
   "repository": {
@@ -29,6 +30,7 @@
     "ticket",
     "djs",
     "discord.js",
+    "v14",
     "v13",
     "djs-ticket",
     "djs-tickets"
@@ -39,17 +41,31 @@
     "url": "https://github.com/Derpinou/discord-tickets/issues"
   },
   "homepage": "https://discord-tickets.js.org",
+  "engines": {
+    "node": ">=24.21.0",
+    "npm": ">=11.19.0"
+  },
   "devDependencies": {
     "@babel/cli": "^7.14.8",
     "@babel/core": "^7.15.0",
     "@babel/preset-env": "^7.15.0",
     "@babel/preset-typescript": "^7.15.0",
-    "@types/node": "^14.0.5",
-    "discord.js": "^13.1.0",
-    "discord.js-docgen": "github:discordjs/docgen#ts-patch",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "@types/node": "^18.19.0",
+    "discord.js": "^14.27.0",
+    "jsdocgen": "github:Derpinou/jsdocgen#semver:^1.0.0",
+    "dotenv": "^18.0.7",
+    "eslint": "^10.12.0",
     "gen-esm-wrapper": "^1.1.2",
     "jsdoc-babel": "^0.5.0",
     "jsdoc-strip-async-await": "^0.1.0",
-    "typescript": "^4.0.2"
+    "typescript": "^5.4.0",
+    "typescript-eslint": "^8.71.2"
+  },
+  "peerDependencies": {
+    "discord.js": "^14.4.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
